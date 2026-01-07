@@ -1,11 +1,8 @@
 # Dev Log:
 
-This document must be updated daily every time you finish a work session.
+## Samuel Isakov
 
-## Dave Kim  (CHANGE THIS!!!!! Also change the file name!)
-
-### 2024-01-02 - Brief description
-Expanded description including how much time was spent on task.
-
-### 2024-01-03 - Brief description
-Expanded description including how much time was spent on task.
+### 2026-01-07 - Writing boilerplate and importing networking.
+I wrote the boilerplate for the codebase, including the makefile.
+I imported the server and client handshakes from lab 16. I intend to use these handshakes for more advanced use cases than that seen in lab 16.
+Also I did some research and thinking about how a master computer can send commands to nodes, thinking about fork() and execvp().
