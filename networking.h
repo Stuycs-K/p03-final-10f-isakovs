@@ -14,7 +14,7 @@
 
 #ifndef NETWORKING_H
 #define NETWORKING_H
-#define PORT "41337"
+#define PORT "41547"
 #define BUFFER_SIZE 1024
 #define BACKLOG 10
 void err(int i, char*message);

@@ -21,15 +21,11 @@ Run "make compile"
 
 Run "make master" on the intended master computer, to open the control center and listen to node connections.
 
-Afterwards, run "make node" on every computer that is intended to be a node, it will connect to the master and serve its requests.
-
 Interaction:
 
 The user is prompted for instructions on the master computer, and all interaction is explained and conducted on that master computer.
 
-Node computers' terminals only show what that node is being ordered to do, interaction is disabled there except for quitting the program.
-
-Quit the program(s) by pressing Ctrl+C.
+Quit the program by pressing Ctrl+C.
 
 ### Resources/ References:
 
