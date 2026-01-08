@@ -25,15 +25,13 @@ void clientLogic(int server_socket){
 }
 
 int main(int argc, char *argv[] ) {
+	sleep(1);
 	char* IP;
 	if (argv[1]) IP = argv[1];
 	else IP = "127.0.0.1";
-	printf("Using IP: %s\n", IP);
-    if(argc>1){
-        IP=argv[1];
-    }
+	//printf("Using IP: %s\n", IP);
     int server_socket = client_tcp_handshake(IP);
-    printf("Connected to server.\n");
+    //printf("Connected to server.\n");
     clientLogic(server_socket);
     return 0;
 }

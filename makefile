@@ -1,8 +1,6 @@
 .PHONY: compile master node clean
 master: progm
 	@./progm
-node: progn
-	@./progn
 clean:
 	rm -f *.o progm progn
 compile progm progn: node.o master.o networking.o
