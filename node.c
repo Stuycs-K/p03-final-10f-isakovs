@@ -27,7 +27,7 @@ void clientLogic(int server_socket){
 }
 
 int main(int argc, char *argv[] ) {
-	sleep(1);
+	//sleep(1);
 	char* IP;
 	if (argv[1]) IP = argv[1];
 	else IP = "127.0.0.1";
