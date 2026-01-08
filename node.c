@@ -15,12 +15,14 @@ void clientLogic(int server_socket){
 		*/
 		memset(buff, 0, BUFFER_SIZE);
         if (!read(server_socket, buff, BUFFER_SIZE-1)) {
-			printf("Disconnected from server.\n");
+			//printf("Disconnected from server.\n");
 			exit(0);
 		}
-		char *temp = strchr(buff, '\n');
-		if (temp) *temp = 0;
-        printf("Received: %s\n", buff);
+		buff[strlen(buff)] = 0;
+		write(server_socket, buff, strlen(buff));
+		//char *temp = strchr(buff, '\n');
+		//if (temp) *temp = 0;
+        //printf("Received: %s\n", buff);
     }
 }
 

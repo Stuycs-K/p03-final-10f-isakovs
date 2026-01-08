@@ -1,22 +1,6 @@
 #include "networking.h"
 
-// the number of nodes connected may stay scoped in main
-// use forking to make new nodes. If a node is closed then close all socks and error.
 // 149.89.40.[100-134] (marge)
-
-void subserver(int client_socket) {
-	char buff[BUFFER_SIZE];
-	memset(buff, 0, BUFFER_SIZE);
-	int bytes;
-	while ((bytes = read(client_socket, buff, BUFFER_SIZE)) > 0) {
-		buff[bytes] = 0;
-		char* out = "testing";
-		write(client_socket, out, 1+strlen(out));
-		memset(buff, 0, BUFFER_SIZE);
-	}
-	close(client_socket);
-	exit(0);
-}
 
 int main() {
 	signal(SIGCHLD, SIG_IGN); // prevents zombies
@@ -43,12 +27,36 @@ int main() {
 	}
 	int nodes_conn = 0;
 	int listen_socket = server_setup();
+	fd_set read_fds;
+	FD_ZERO(&read_fds);
+	int fd_max = 0;
+	int socks[nodes];
 	while (listen_socket) {
 		int client_socket = server_tcp_handshake(listen_socket);
-		if (!fork()) subserver(client_socket);
+		socks[nodes_conn] = client_socket;
+		FD_SET(client_socket, &read_fds);
+		if (fd_max < client_socket) fd_max = client_socket;
 		nodes_conn++;
-		printf("Nodes connected: %d\n", nodes_conn);
-		close(client_socket);
+		if (nodes_conn == nodes) break;
+	}
+	printf("All nodes connected.\n");
+	for (int i = 0; i<nodes; i++) {
+		char task[128];
+		snprintf(task, sizeof(task), "Node %d echo", i);
+		write(socks[i], task, strlen(task));
+	}
+	err(select(fd_max+1, &read_fds, 0, 0, 0), "select error");
+	for (int i = 0; i<nodes; i++) {
+		char buff[128];
+		if (!FD_ISSET(socks[i], &read_fds)) {
+			FD_ZERO(&read_fds);
+			err(select(fd_max+1, &read_fds, 0, 0, 0), "select error");
+			i--;
+		}
+		else {
+			buff[read(socks[i], buff, sizeof(buff))] = 0;
+			printf("%s\n", buff);
+		}
 	}
 	return 0;
 }
