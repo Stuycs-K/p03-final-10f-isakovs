@@ -1,11 +1,11 @@
 .PHONY: compile master node clean
 master: progm
 	@./progm
-intgen: progr
+intgen: progintgen
 	@./progintgen
 clean:
-	rm -f *.o prog* random_numbers.txt
-compile progm progn: node.o master.o networking.o randintgen.o max.o
+	rm -f *.o prog*
+compile progm progn progintgen progmax: node.o master.o networking.o randintgen.o max.o
 	@gcc -o progm master.o networking.o
 	@gcc -o progn node.o networking.o
 	@gcc -o progintgen randintgen.o

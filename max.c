@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <limits.h>
 #include <time.h>
+#include <stdlib.h>
 
 int main() {
 	int begin = clock();
     FILE *file = fopen("random_numbers.txt", "r");
     int max = INT_MIN;
-    int curr;
-    while (fscanf(file, "%d", &curr)) {
+	int curr;
+	char buff[64];
+    while (fgets(buff, 64, file)) {
+		curr = atoi(buff);
         if (max < curr) max = curr;
     }
     fclose(file);
