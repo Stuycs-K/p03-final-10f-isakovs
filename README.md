@@ -19,7 +19,9 @@ Clone the repo.
 
 Run "make compile"
 
-Run "make master" on the intended master computer, to open the control center and listen to node connections.
+Run "make intgen" to generate an 8gb random integer data file for testing purposes. The file will take a few minutes to generate.
+
+Run "make master" on the intended master computer, to open the control center and spawn nodes from there.
 
 Interaction:
 

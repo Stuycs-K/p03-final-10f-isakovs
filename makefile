@@ -5,10 +5,10 @@ intgen: progintgen
 	@./progintgen
 clean:
 	rm -f *.o prog*
-compile progm progn progintgen progmax: node.o master.o networking.o randintgen.o max.o
+compile progm progn progintgen progmax: node.o master.o networking.o intgen.o max.o
 	@gcc -o progm master.o networking.o
 	@gcc -o progn node.o networking.o
-	@gcc -o progintgen randintgen.o
+	@gcc -o progintgen intgen.o
 	@gcc -o progmax max.o 
 node.o: node.c networking.h
 	@gcc -Wall -c node.c
@@ -16,7 +16,7 @@ master.o: master.c networking.h
 	@gcc -Wall -c master.c
 networking.o: networking.c networking.h
 	@gcc -Wall -c networking.c
-randintgen.o: randintgen.c
-	@gcc -Wall -c randintgen.c
+intgen.o: intgen.c
+	@gcc -Wall -c intgen.c
 max.o: max.c
 	@gcc -Wall -c max.c
