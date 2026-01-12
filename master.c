@@ -13,6 +13,8 @@ int main() {
 		printf("You must make between 1 and 35 nodes!\n");
 		return 1;
 	}
+	struct timeval start_time, end_time;
+	gettimeofday(&start_time, NULL);
 	FILE* fp;
 	char buff1[64];
 	char ip[64] = "";
@@ -31,7 +33,7 @@ int main() {
 		snprintf(cmd, sizeof(cmd), "%s/progn %s %s %lld %lld", wd_path, ip, wd_path, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
-		if (!fork()) execvp(args[0], args);
+		if (!fork()) err(execvp(args[0], args), "execvp fail");
 	}
 	int nodes_conn = 0;
 	int listen_socket = server_setup();
@@ -40,38 +42,46 @@ int main() {
 	FD_ZERO(&read_fds);
 	int fd_max = 0;
 	int socks[nodes];
-	struct timeval start_time, end_time;
-	gettimeofday(&start_time, NULL);
-	while (nodes_conn < nodes) {
-	int client_socket = server_tcp_handshake(listen_socket);
-	socks[nodes_conn] = client_socket;
-	FD_SET(client_socket, &read_fds);
-	if (client_socket > fd_max) fd_max = client_socket;
+	while (listen_socket) {
+		int client_socket = server_tcp_handshake(listen_socket);
+		socks[nodes_conn] = client_socket;
+		FD_SET(client_socket, &read_fds);
+		if (fd_max < client_socket) fd_max = client_socket;
 		nodes_conn++;
+		if (nodes_conn == nodes) break;
 	}
 	printf("All nodes connected.\n");
+	/*
+	for (int i = 0; i<nodes; i++) {
+		char task[128];
+		snprintf(task, sizeof(task), "Node %d echo", i);
+		write(socks[i], task, strlen(task));
+	}
+	*/
 	int max = INT_MIN;
 	int nodes_finished = 0;
 	while (nodes_finished < nodes) {
 		select_fds = read_fds;
 		int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
-		if (selret < 0) break;
+		if (!selret) {
+			printf("sel returned zero\n");
+			return 1;
+		}
 		for (int i = 0; i < nodes; i++) {
-			if (socks[i] != -1 && FD_ISSET(socks[i], &select_fds)) {
+			if (FD_ISSET(socks[i], &select_fds)) {
 				char buff[128];
-				memset(buff, 0, sizeof(buff));
 				int n = read(socks[i], buff, sizeof(buff) - 1);
 				if (n > 0) {
-					int curr = atoi(buff);
-					if (curr > max) max = curr;
-					close(socks[i]);
-					FD_CLR(socks[i], &read_fds);
-					socks[i] = -1;
-					nodes_finished++;
-				} else if (n == 0) {
-					close(socks[i]);
-					FD_CLR(socks[i], &read_fds);
-					socks[i] = -1;
+					buff[n] = '\0';
+				    int curr = atoi(buff);
+					printf("NEW NUMBER RECIEVED: %d\n", curr);
+				    if (curr > max) max = curr;
+				    close(socks[i]);
+				    FD_CLR(socks[i], &read_fds);
+				    nodes_finished++;
+			    } else if (n == 0) {
+		            close(socks[i]);
+	                FD_CLR(socks[i], &read_fds);
 					nodes_finished++;
 				}
 			}
