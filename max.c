@@ -37,5 +37,6 @@ int main(int argc, char* argv[]) {
     }
     fclose(file);
     printf("%d\n", max);
+	fflush(stdout);
     return 0;
 }

@@ -14,8 +14,11 @@ int main(int argc, char *argv[]) {
 	char cmd[2048];
 	snprintf(cmd, sizeof(cmd), "%s/progmax %s %s %s 2>&1", argv[2], argv[2], argv[3], argv[4]);
 	FILE* fp = popen(cmd, "r");
+	//printf("Node: Executing command \n");
 	if (fgets(buff, sizeof(buff), fp)) {
+		//printf("Node: Read value '%s' from pipe\n", buff);
 		write(server_socket, buff, strlen(buff));
+		//printf("Node: Sent data to master\n");
 	} else printf("empty pipe\n");
 	pclose(fp);
 		/*memset(buff, 0, BUFFER_SIZE);
