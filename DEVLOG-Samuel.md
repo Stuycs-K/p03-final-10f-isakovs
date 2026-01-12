@@ -20,3 +20,8 @@ Class commit: I finished the process of spawning nodes on different physical mac
 
 Home comitts: I made a program to generate a large random integer file of 8 gigabytes in order to use that as testing material.
 I also made a program that reads the generated file and prints out the max integer it finds. I also created a means to segment that program into the active nodes. Still experiencing some issues with reading from sockets without blocking execution.
+
+### 2026-01-09 -- 2026-01-11
+Overall, I attempted to fix an issue that was ultimately no fault of mine:
+
+The bottleneck to scanning a file appears to be the school network, so the minimal working product is completed, but I need to work on other problems for the computer to solve now.
