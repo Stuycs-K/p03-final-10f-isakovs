@@ -34,48 +34,51 @@ int main() {
 		if (!fork()) execvp(args[0], args);
 	}
 	int nodes_conn = 0;
-int listen_socket = server_setup();
-fd_set read_fds;
-fd_set select_fds;
-FD_ZERO(&read_fds);
-int fd_max = 0;
-int socks[nodes];
-struct timeval start_time, end_time;
-gettimeofday(&start_time, NULL);
-while (nodes_conn < nodes) {
-int client_socket = server_tcp_handshake(listen_socket);
-socks[nodes_conn] = client_socket;
-FD_SET(client_socket, &read_fds);
-if (client_socket > fd_max) fd_max = client_socket;
-nodes_conn++;
-}
-printf("All nodes connected.\n");
-int max = INT_MIN;
-int nodes_finished = 0;
-while (nodes_finished < nodes) {
-select_fds = read_fds;
-int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
-if (selret < 0) break;
-for (int i = 0; i < nodes; i++) {
-if (socks[i] != -1 && FD_ISSET(socks[i], &select_fds)) {
-char buff[128];
-memset(buff, 0, sizeof(buff));
-int n = read(socks[i], buff, sizeof(buff) - 1);
-if (n > 0) {
-int curr = atoi(buff);
-if (curr > max) max = curr;
-close(socks[i]);
-FD_CLR(socks[i], &read_fds);
-socks[i] = -1;
-nodes_finished++;
-} else if (n == 0) {
-close(socks[i]);
-FD_CLR(socks[i], &read_fds);
-socks[i] = -1;
-nodes_finished++;
-}}}}
-gettimeofday(&end_time, NULL);
-double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
-printf("Max is %d, took %f seconds.\n", max, time_taken);
-return 0;
+	int listen_socket = server_setup();
+	fd_set read_fds;
+	fd_set select_fds;
+	FD_ZERO(&read_fds);
+	int fd_max = 0;
+	int socks[nodes];
+	struct timeval start_time, end_time;
+	gettimeofday(&start_time, NULL);
+	while (nodes_conn < nodes) {
+	int client_socket = server_tcp_handshake(listen_socket);
+	socks[nodes_conn] = client_socket;
+	FD_SET(client_socket, &read_fds);
+	if (client_socket > fd_max) fd_max = client_socket;
+		nodes_conn++;
+	}
+	printf("All nodes connected.\n");
+	int max = INT_MIN;
+	int nodes_finished = 0;
+	while (nodes_finished < nodes) {
+		select_fds = read_fds;
+		int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
+		if (selret < 0) break;
+		for (int i = 0; i < nodes; i++) {
+			if (socks[i] != -1 && FD_ISSET(socks[i], &select_fds)) {
+				char buff[128];
+				memset(buff, 0, sizeof(buff));
+				int n = read(socks[i], buff, sizeof(buff) - 1);
+				if (n > 0) {
+					int curr = atoi(buff);
+					if (curr > max) max = curr;
+					close(socks[i]);
+					FD_CLR(socks[i], &read_fds);
+					socks[i] = -1;
+					nodes_finished++;
+				} else if (n == 0) {
+					close(socks[i]);
+					FD_CLR(socks[i], &read_fds);
+					socks[i] = -1;
+					nodes_finished++;
+				}
+			}
+		}
+	}
+	gettimeofday(&end_time, NULL);
+	double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+	printf("Max is %d, took %f seconds.\n", max, time_taken);
+	return 0;
 }
