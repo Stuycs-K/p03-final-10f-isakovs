@@ -25,3 +25,8 @@ I also made a program that reads the generated file and prints out the max integ
 Overall, I attempted to fix an issue that was ultimately no fault of mine:
 
 The bottleneck to scanning a file appears to be the school network, so the minimal working product is completed, but I need to work on other problems for the computer to solve now.
+
+### 2026-01-12
+I have decided that for my next program to test, I will implement Bogosort. I implemented the necessary boilerplate to get Bogosort set up on the serverside.
+
+I am thinking about passing the entire unsorted array through the command line rather than writing to the socket, the server will just read the first socket that is ready.

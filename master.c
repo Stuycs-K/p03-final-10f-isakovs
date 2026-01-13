@@ -46,7 +46,12 @@ int main() {
 	char cmd2[2048];
 	long long seg = BYTES/((long long)nodes);
 	for (int i = 0; i<nodes; i++) {
-		snprintf(cmd, sizeof(cmd), "%s/progn %s %s %lld %lld", wd_path, ip, wd_path, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
+		if (option == 1) {
+			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %lld %lld", wd_path, ip, wd_path, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
+		}
+		else {
+			snprintf(cmd, sizeof(cmd), "%s/progbogo");
+		}
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
 		if (!fork()) err(execvp(args[0], args), "execvp fail");
@@ -109,7 +114,10 @@ int main() {
 		printf("Max is %d, took %f seconds.\n", max, time_taken);
 	}
 	else if (option == 2) {
-		
+		int unsorted[order];
+		FILE *r_file = fopen("/dev/urandom", "rb");
+		fread(unsorted, sizeof(int), order, r_file);
+		// Actually this needs to be moved to ssh initialization. This can be passed as args.
 	}
 	return 0;
 }
