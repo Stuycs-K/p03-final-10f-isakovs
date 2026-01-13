@@ -8,7 +8,7 @@ int main() {
 	getcwd(wd_path, sizeof(wd_path));
 	int nodes;
 	int option;
-	printf("Choose the program to test.\nFile scanning (1)\nBogosort (2)\n");
+	printf("File scanning (1)\nBogosort (2)\nChoose the number program to test: ");
 	scanf("%d", &option);
 	if (!(option == 1 || option == 2)) {
 		printf("You must select option 1 or option 2 by inputting the number 1 or the number 2.\n");
@@ -47,10 +47,19 @@ int main() {
 	long long seg = BYTES/((long long)nodes);
 	for (int i = 0; i<nodes; i++) {
 		if (option == 1) {
-			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %lld %lld", wd_path, ip, wd_path, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
+			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %lld %lld", wd_path, ip, wd_path, option, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
 		}
 		else {
-			snprintf(cmd, sizeof(cmd), "%s/progbogo");
+			int unsorted[order];
+			FILE *r_file = fopen("/dev/urandom", "rb");
+			fread(unsorted, sizeof(int), order, r_file);
+			int seed;
+			fread(&seed, sizeof(int), 1, r_file);
+			fclose(r_file);
+			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %d %d", wd_path, ip, wd_path, option, order, seed);
+			for (int j = 0; j<order; j++) {
+				snprintf(cmd+strlen(cmd), sizeof(cmd), " %d", unsorted[j]);
+			}
 		}
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
@@ -114,10 +123,7 @@ int main() {
 		printf("Max is %d, took %f seconds.\n", max, time_taken);
 	}
 	else if (option == 2) {
-		int unsorted[order];
-		FILE *r_file = fopen("/dev/urandom", "rb");
-		fread(unsorted, sizeof(int), order, r_file);
-		// Actually this needs to be moved to ssh initialization. This can be passed as args.
+		return 0;
 	}
 	return 0;
 }
