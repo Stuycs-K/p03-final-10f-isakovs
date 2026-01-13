@@ -7,11 +7,27 @@ int main() {
 	char wd_path[1024];
 	getcwd(wd_path, sizeof(wd_path));
 	int nodes;
+	int option;
+	printf("Choose the program to test.\nFile scanning (1)\nBogosort (2)\n");
+	scanf("%d", &option);
+	if (!(option == 1 || option == 2)) {
+		printf("You must select option 1 or option 2 by inputting the number 1 or the number 2.\n");
+		return 1;
+	}
 	printf("How many nodes should be created? (1-35): ");
 	scanf("%d", &nodes);
 	if (nodes<1 || nodes>35) {
 		printf("You must make between 1 and 35 nodes!\n");
 		return 1;
+	}
+	int order;
+	if (option == 2) {
+		printf("What order of Bogosort should be tested? (2-10): ");
+		scanf("%d", &order);
+		if (order<2 || order>10) {
+			printf("The order must be between 2 and 10. Order 1 is too trivial. Order 11+ is a punishment to computers.\n");
+			return 1;
+		}
 	}
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
@@ -58,37 +74,42 @@ int main() {
 		write(socks[i], task, strlen(task));
 	}
 	*/
-	int max = INT_MIN;
-	int nodes_finished = 0;
-	while (nodes_finished < nodes) {
-		select_fds = read_fds;
-		int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
-		if (!selret) {
-			printf("sel returned zero\n");
-			return 1;
-		}
-		for (int i = 0; i < nodes; i++) {
-			if (FD_ISSET(socks[i], &select_fds)) {
-				char buff[128];
-				int n = read(socks[i], buff, sizeof(buff) - 1);
-				if (n > 0) {
-					buff[n] = '\0';
-				    int curr = atoi(buff);
-					printf("NEW NUMBER RECIEVED: %d\n", curr);
-				    if (curr > max) max = curr;
-				    close(socks[i]);
-				    FD_CLR(socks[i], &read_fds);
-				    nodes_finished++;
-			    } else if (n == 0) {
-		            close(socks[i]);
-	                FD_CLR(socks[i], &read_fds);
-					nodes_finished++;
+	if (option == 1) {
+		int max = INT_MIN;
+		int nodes_finished = 0;
+		while (nodes_finished < nodes) {
+			select_fds = read_fds;
+			int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
+			if (!selret) {
+				printf("sel returned zero\n");
+				return 1;
+			}
+			for (int i = 0; i < nodes; i++) {
+				if (FD_ISSET(socks[i], &select_fds)) {
+					char buff[128];
+					int n = read(socks[i], buff, sizeof(buff) - 1);
+					if (n > 0) {
+						buff[n] = '\0';
+					    int curr = atoi(buff);
+						printf("NEW NUMBER RECIEVED: %d\n", curr);
+					    if (curr > max) max = curr;
+					    close(socks[i]);
+					    FD_CLR(socks[i], &read_fds);
+					    nodes_finished++;
+				    } else if (n == 0) {
+				        close(socks[i]);
+				        FD_CLR(socks[i], &read_fds);
+						nodes_finished++;
+					}
 				}
 			}
 		}
+		gettimeofday(&end_time, NULL);
+		double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+		printf("Max is %d, took %f seconds.\n", max, time_taken);
 	}
-	gettimeofday(&end_time, NULL);
-	double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
-	printf("Max is %d, took %f seconds.\n", max, time_taken);
+	else if (option == 2) {
+		
+	}
 	return 0;
 }
