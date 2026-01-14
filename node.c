@@ -40,8 +40,17 @@ int main(int argc, char *argv[]) {
 			a[i] = atoi(argv[6+i]);
 		}
 		srand(seed);
+
+		fd_set read_fds;
+		fd_set select_fds;
+		FD_ZERO(&read_fds);
+		FD_SET(server_socket);
+		int selret;
 		while (1) { // Replace 1 with ping()
-			for (int useless = 0; useless<100000; useless++) {
+			select_fds = read_fds;
+			selret = select(server_socket+1, &select_fds, 0, 0, 0);
+			if (FD_ISSET(server_socket, &select_fds)) return 0;
+			for (int useless = 0; useless<10000; useless++) {
 				int t;
 				int r;
 				int sorted = 1;
