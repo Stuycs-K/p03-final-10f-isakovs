@@ -45,15 +45,25 @@ int main() {
 	char cmd[4096];
 	char cmd2[2048];
 	long long seg = BYTES/((long long)nodes);
+	int unsorted[order];
+	int seed;
+	FILE* r_file;
+	if (option == 2) {
+		r_file = fopen("/dev/urandom", "rb");
+		fread(unsorted, sizeof(int), order, r_file);
+		fclose(r_file);
+		printf("Unsorted array:\n[");
+		for (int j = 0; j<order-1; j++) {
+			printf("%d, ", unsorted[j]);
+		}
+		printf("%d]\n", unsorted[order-1]);
+	}
 	for (int i = 0; i<nodes; i++) {
 		if (option == 1) {
 			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %lld %lld", wd_path, ip, wd_path, option, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
 		}
 		else {
-			int unsorted[order];
-			FILE *r_file = fopen("/dev/urandom", "rb");
-			fread(unsorted, sizeof(int), order, r_file);
-			int seed;
+			r_file = fopen("/dev/urandom", "rb");
 			fread(&seed, sizeof(int), 1, r_file);
 			fclose(r_file);
 			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %d %d", wd_path, ip, wd_path, option, order, seed);
@@ -123,7 +133,33 @@ int main() {
 		printf("Max is %d, took %f seconds.\n", max, time_taken);
 	}
 	else if (option == 2) {
-		return 0;
+		while (1) {
+			select_fds = read_fds;
+			int selret = select(fd_max + 1, &select_fds, 0, 0, 0);
+			if (!selret) {
+				printf("sel returned zero\n");
+				return 1;
+			}
+			for (int i = 0; i<nodes; i++) {
+				if (FD_ISSET(socks[i], &select_fds)) {
+					int sorted[order];
+					read(socks[i], sorted, sizeof(sorted));
+					printf("Sorted array:\n[");
+					for (int j = 0; j<order-1; j++) {
+						printf("%d, ", sorted[j]);
+					}
+					printf("%d]\n", sorted[order-1]);
+					const char buffchar[] = "h";
+					close(socks[i]);
+					for (int j = 0; j<nodes; j++) {
+						if (j == i) continue;
+						write(socks[j], buffchar, sizeof(buffchar));
+						close(socks[j]);
+					}
+					return 0;
+				}
+			}
+		}
 	}
 	return 0;
 }

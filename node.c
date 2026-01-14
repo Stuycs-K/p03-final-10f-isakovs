@@ -4,6 +4,7 @@ void clientLogic(int server_socket){
     }
 
 int main(int argc, char *argv[]) {
+	printf("Node started\n");
 	char* IP;
 	if (argv[1]) IP = argv[1];
 	else IP = "127.0.0.1";
@@ -44,12 +45,13 @@ int main(int argc, char *argv[]) {
 		fd_set read_fds;
 		fd_set select_fds;
 		FD_ZERO(&read_fds);
-		FD_SET(server_socket);
-		int selret;
+		FD_SET(server_socket, &read_fds);
+		printf("starting loop\n");
 		while (1) { // Replace 1 with ping()
 			select_fds = read_fds;
-			selret = select(server_socket+1, &select_fds, 0, 0, 0);
+			select(server_socket+1, &select_fds, 0, 0, 0);
 			if (FD_ISSET(server_socket, &select_fds)) return 0;
+			printf("Checked server\n");
 			for (int useless = 0; useless<10000; useless++) {
 				int t;
 				int r;
@@ -62,6 +64,11 @@ int main(int argc, char *argv[]) {
 				}
 				if (sorted) {
 					write(server_socket, a, sizeof(a));
+					printf("Written: [\n");
+					for (int j = 0; j<order-1; j++) {
+						printf("%d, ", a[j]);
+					}
+					printf("%d]\n", a[order-1]);	
 					return 0;
 				}
 				for (int i = 0; i<order; i++) {
