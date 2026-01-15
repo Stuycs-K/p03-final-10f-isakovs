@@ -22,12 +22,13 @@ int main() {
 	}
 	int order;
 	if (option == 2) {
-		printf("What order of Bogosort should be tested? (2-10): ");
+		printf("What order of Bogosort should be tested? (Soft maximum is 13): ");
 		scanf("%d", &order);
-		if (order<2 || order>10) {
-			printf("The order must be between 2 and 10. Order 1 is too trivial. Order 11+ is a punishment to computers.\n");
+		if (order<2) {
+			printf("Choose an order above 1!\n");
 			return 1;
 		}
+		else if (order>13) printf("Good luck.\n");
 	}
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
@@ -73,7 +74,7 @@ int main() {
 		}
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
-		if (!fork()) err(execvp(args[0], args), "execvp fail");
+		if (!fork()) execvp(args[0], args);
 	}
 	int nodes_conn = 0;
 	int listen_socket = server_setup();
@@ -90,7 +91,7 @@ int main() {
 		nodes_conn++;
 		if (nodes_conn == nodes) break;
 	}
-	printf("All nodes connected.\n");
+	//printf("All nodes connected.\n");
 	/*
 	for (int i = 0; i<nodes; i++) {
 		char task[128];
@@ -149,11 +150,14 @@ int main() {
 						printf("%d, ", sorted[j]);
 					}
 					printf("%d]\n", sorted[order-1]);
-					const char buffchar[] = "h";
-					close(socks[i]);
+					gettimeofday(&end_time, NULL);
+					double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+					printf("Solved in %f seconds.\n", time_taken);
+					//const char buffchar[] = "h";
+					//close(socks[i]);
 					for (int j = 0; j<nodes; j++) {
-						if (j == i) continue;
-						write(socks[j], buffchar, sizeof(buffchar));
+						//if (j == i) continue;
+						//write(socks[j], buffchar, sizeof(buffchar));
 						close(socks[j]);
 					}
 					return 0;

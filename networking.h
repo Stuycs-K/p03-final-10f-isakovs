@@ -13,6 +13,7 @@
 #include <limits.h>
 #include <time.h>
 #include <sys/time.h>
+#include <poll.h>
 
 
 #ifndef NETWORKING_H

@@ -4,7 +4,6 @@ void clientLogic(int server_socket){
     }
 
 int main(int argc, char *argv[]) {
-	printf("Node started\n");
 	char* IP;
 	if (argv[1]) IP = argv[1];
 	else IP = "127.0.0.1";
@@ -12,26 +11,14 @@ int main(int argc, char *argv[]) {
 	int option = atoi(argv[3]);
     if (option == 1) {
         char buff[BUFFER_SIZE];
-        //while (1) {
     	memset(buff, 0, BUFFER_SIZE);
     	char cmd[2048];
     	snprintf(cmd, sizeof(cmd), "%s/progmax %s %s %s 2>&1", argv[2], argv[2], argv[3], argv[4]);
     	FILE* fp = popen(cmd, "r");
-    	//printf("Node: Executing command \n");
     	if (fgets(buff, sizeof(buff), fp)) {
-    		//printf("Node: Read value '%s' from pipe\n", buff);
     		write(server_socket, buff, strlen(buff));
-    		//printf("Node: Sent data to master\n");
     	} else printf("empty pipe\n");
     	pclose(fp);
-    		/*memset(buff, 0, BUFFER_SIZE);
-            if (!read(server_socket, buff, BUFFER_SIZE-1)) {
-    			exit(0);
-    		}
-    		buff[strlen(buff)] = 0;
-    		write(server_socket, buff, strlen(buff));
-    		*/
-        //}
     }
     else if (option == 2) {
         int order = atoi(argv[4]);
@@ -41,22 +28,21 @@ int main(int argc, char *argv[]) {
 			a[i] = atoi(argv[6+i]);
 		}
 		srand(seed);
-
-		fd_set read_fds;
-		fd_set select_fds;
-		FD_ZERO(&read_fds);
-		FD_SET(server_socket, &read_fds);
-		printf("starting loop\n");
-		while (1) { // Replace 1 with ping()
-			select_fds = read_fds;
-			select(server_socket+1, &select_fds, 0, 0, 0);
-			if (FD_ISSET(server_socket, &select_fds)) return 0;
-			printf("Checked server\n");
-			for (int useless = 0; useless<10000; useless++) {
+		
+		struct pollfd pfd;
+		pfd.fd = server_socket;
+		pfd.events = POLLIN | POLLHUP;
+		pfd.revents = 0;
+		while (1) {
+			if (poll(&pfd, 1, 0)) {
+				//printf("Node closed to poll\n");
+				return 0;
+			}
+			for (int useless = 0; useless<25000000; useless++) {
 				int t;
 				int r;
 				int sorted = 1;
-				for (int i = 0; i<order; i++) {
+				for (int i = 0; i<order-1; i++) {
 					if (a[i]>a[i+1]) {
 						sorted = 0;
 						break;
@@ -64,11 +50,11 @@ int main(int argc, char *argv[]) {
 				}
 				if (sorted) {
 					write(server_socket, a, sizeof(a));
-					printf("Written: [\n");
+					/*printf("Written: [");
 					for (int j = 0; j<order-1; j++) {
 						printf("%d, ", a[j]);
 					}
-					printf("%d]\n", a[order-1]);	
+					printf("%d]\n", a[order-1]);*/
 					return 0;
 				}
 				for (int i = 0; i<order; i++) {
@@ -79,8 +65,6 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
-		// ADD ping() in networking.c/h and ping every 100k iter.
-
     }
 	return 0;
 }

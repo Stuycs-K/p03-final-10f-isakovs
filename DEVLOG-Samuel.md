@@ -30,3 +30,11 @@ The bottleneck to scanning a file appears to be the school network, so the minim
 I have decided that for my next program to test, I will implement Bogosort. I implemented the necessary boilerplate to get Bogosort set up on the serverside.
 
 I am thinking about passing the entire unsorted array through the command line rather than writing to the socket, the server will just read the first socket that is ready.
+
+### 2026-01-13
+I spent the day writing Bogosort in node.c, which is where the actual algorithm is placed.
+
+### 2026-01-14
+I spent the day writing the part of the code that select()'s every node to find if one has sorted the array correctly, and then causes all other nodes to close.
+
+Bogosort now works. Machine .117 refused ssh, for some reason, but for the most part everything works.
