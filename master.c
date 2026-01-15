@@ -1,5 +1,7 @@
 #include "networking.h"
 
+// IDEAS: MANDELBROT SET, MONTE CARLO, BRUTE FORCE PASSWORD HASHING
+
 #define BYTES (1024LL*1024LL*1024LL*8LL)
 
 int main() {
@@ -8,10 +10,10 @@ int main() {
 	getcwd(wd_path, sizeof(wd_path));
 	int nodes;
 	int option;
-	printf("File scanning (1)\nBogosort (2)\nChoose the number program to test: ");
+	printf("File scanning (1)\nBogosort (2)\nApproximate Pi (3)\nChoose the number program to test: ");
 	scanf("%d", &option);
-	if (!(option == 1 || option == 2)) {
-		printf("You must select option 1 or option 2 by inputting the number 1 or the number 2.\n");
+	if (!(option == 1 || option == 2 || option == 3)) {
+		printf("You must select options 1-3 by inputting the option number.\n");
 		return 1;
 	}
 	printf("How many nodes should be created? (1-35): ");
@@ -29,6 +31,14 @@ int main() {
 			return 1;
 		}
 		else if (order>13) printf("Good luck.\n");
+	}
+	if (option == 3) {
+		printf("How many seconds should be spent on the approximation?: \n");
+		scanf("%d", &order);
+		if (order<1) {
+			printf("Choose one or more seconds.\n");
+			return 1;
+		}
 	}
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
@@ -63,7 +73,7 @@ int main() {
 		if (option == 1) {
 			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %lld %lld", wd_path, ip, wd_path, option, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
 		}
-		else {
+		if (option == 2) {
 			r_file = fopen("/dev/urandom", "rb");
 			fread(&seed, sizeof(int), 1, r_file);
 			fclose(r_file);
@@ -71,6 +81,9 @@ int main() {
 			for (int j = 0; j<order; j++) {
 				snprintf(cmd+strlen(cmd), sizeof(cmd), " %d", unsorted[j]);
 			}
+		}
+		if (option == 3) {
+			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %s %d %d", wd_path, ip, wd_path, option, order, seed);
 		}
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
