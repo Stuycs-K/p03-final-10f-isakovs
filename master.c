@@ -11,10 +11,10 @@ int main() {
 	getcwd(wd_path, sizeof(wd_path));
 	int nodes;
 	int option;
-	printf("File scanning (1)\nBogosort (2)\nApproximate Pi (3)\nChoose the number program to test: ");
+	printf("File scanning (1)\nBogosort (2)\nApproximate Pi (3)\nMandelbrot Set (4)\nChoose the number program to test: ");
 	scanf("%d", &option);
-	if (!(option == 1 || option == 2 || option == 3)) {
-		printf("You must select options 1-3 by inputting the option number.\n");
+	if (!(option == 1 || option == 2 || option == 3 || option == 4)) {
+		printf("You must select options 1-4 by inputting the option number.\n");
 		return 1;
 	}
 	printf("How many nodes should be created? (1-35): ");
@@ -24,6 +24,7 @@ int main() {
 		return 1;
 	}
 	int order;
+	int coordset;
 	if (option == 2) {
 		printf("What order of Bogosort should be tested? (Recommended maximum is 13): ");
 		scanf("%d", &order);
@@ -40,6 +41,16 @@ int main() {
 			printf("Choose one or more seconds.\n");
 			return 1;
 		}
+	}
+	else if (option == 4) {
+		printf("How many iterations do you want to perform? (1000+): ");
+		scanf("%d", &order);
+		if (order<1000) {
+			printf("Do not input below 1000\n");
+			return 1;
+		}
+		printf("Choose a Mandelbrot set area to plot:\nRegular Mandelbrot Set (1)\nSeahorse Valley (2)\nElephant Valley (3)\nTriple Spiral (4)\nChoose (1-4): ");
+		scanf("%d", &coordset);
 	}
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
@@ -60,6 +71,8 @@ int main() {
 	int unsorted[order];
 	int seed;
 	FILE* r_file;
+	const int width = 800;
+	const int maxheight = 800; // if changing this, change its counterpart in node.c
 	if (option == 2) {
 		r_file = fopen("/dev/urandom", "rb");
 		fread(unsorted, sizeof(int), order, r_file);
@@ -69,6 +82,18 @@ int main() {
 			printf("%d, ", unsorted[j]);
 		}
 		printf("%d]\n", unsorted[order-1]);
+	} else if (option == 4) {
+		FILE *fp = fopen("mandelbrot.ppm", "wb");
+		if (fp == NULL) {
+		    return 1;
+		}
+		fprintf(fp, "P6\n%d %d\n255\n", width, maxheight);
+		unsigned char zero_pixel[3] = {0, 0, 0};
+		long total_pixels = (long)width * maxheight;
+		for (long i = 0; i < total_pixels; i++) {
+		    fwrite(zero_pixel, 1, 3, fp);
+		}
+		fclose(fp);
 	}
 	for (int i = 0; i<nodes; i++) {
 		if (option == 1) {
@@ -87,8 +112,12 @@ int main() {
 			r_file = fopen("/dev/urandom", "rb");
 			fread(&seed, sizeof(int), 1, r_file);
 			fclose(r_file);
-			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %d %d", wd_path, ip, wd_path, option, order, seed);
+		snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %d %d", wd_path, ip, wd_path, option, order, seed);
 		}
+		else if (option == 4) {
+			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %d %d %d %d %d", wd_path, ip, wd_path, option, order, width, (maxheight/nodes)*i, (i==nodes-1)?maxheight:(maxheight/nodes)*(i+1), coordset);
+		}
+		//printf("%s\n", cmd);
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
 		if (!fork()) execvp(args[0], args);
@@ -205,6 +234,26 @@ int main() {
 		double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
 		long double approx = sum/(long double)nodes;
 		printf("Pi approximation is %.*Lf (%f%% error), took %f seconds.\n", LDBL_DECIMAL_DIG, approx, (float)((approx-PI)/PI), time_taken);
+	} else if (option == 4) {
+		int nodes_finished = 0;
+		while (nodes_finished < nodes) {
+			select_fds = read_fds;
+			int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
+			if (!selret) {
+				printf("sel returned zero\n");
+				return 1;
+			}
+			for (int i = 0; i < nodes; i++) {
+				if (FD_ISSET(socks[i], &select_fds)) {
+					close(socks[i]);
+					FD_CLR(socks[i], &read_fds);
+					nodes_finished++;
+				}
+			}
+		}
+		gettimeofday(&end_time, NULL);
+		double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+		printf("mandelbrot.ppm created, took %f seconds.\n", time_taken);
 	}
 	return 0;
 }

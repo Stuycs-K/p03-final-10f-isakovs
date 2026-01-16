@@ -38,3 +38,12 @@ I spent the day writing Bogosort in node.c, which is where the actual algorithm 
 I spent the day writing the part of the code that select()'s every node to find if one has sorted the array correctly, and then causes all other nodes to close.
 
 Bogosort now works. Machine .117 refused ssh, for some reason, but for the most part everything works.
+
+### 2026-01-15
+I spent today making two new programs to test
+
+A smaller program is the approximation of PI using the Monte Carlo method, which is not sequential and thus perfect for distribution.
+
+The most complex program I made today is the Mandelbrot Set plotter. It distributes the creation of a mandelbrot set into a .ppm image across nodes.
+
+When the program is distributed, there appear to be minor artifacts in the image, but that is probably the fault of the Network File System. All nodes write to one image file, which may be the culprit.
