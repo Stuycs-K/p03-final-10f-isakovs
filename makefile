@@ -1,10 +1,12 @@
 .PHONY: compile master node clean
+run: progm
+	@./progm
 master: progm
 	@./progm
 intgen: progintgen
 	@./progintgen
 clean:
-	rm -f *.o prog*
+	rm -f *.o prog* *.ppm
 compile progm progn progintgen progmax: node.o master.o networking.o intgen.o max.o
 	@gcc -o progm master.o networking.o
 	@gcc -o progn node.o networking.o
