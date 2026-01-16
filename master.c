@@ -237,7 +237,7 @@ int main() {
 		gettimeofday(&end_time, NULL);
 		double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
 		long double approx = sum/(long double)nodes;
-		printf("Pi approximation is %.*Lf (%f%% error), took %f seconds.\n", LDBL_DECIMAL_DIG, approx, (float)((approx-PI)/PI), time_taken);
+		printf("Pi approximation is %.*Lf (%.*f%% error), took %f seconds.\n", LDBL_DECIMAL_DIG, approx, DBL_DECIMAL_DIG, (double)((approx-PI)/PI), time_taken);
 	} else if (option == 4) {
 		int nodes_finished = 0;
 		while (nodes_finished < nodes) {
