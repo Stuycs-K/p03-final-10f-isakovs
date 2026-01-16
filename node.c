@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 		char header[128];
-		int header_offset = sprintf(header, "P6\n%d %d\n255\n", width, 800);
+		int header_offset = sprintf(header, "P6\n%d %d\n255\n", width, width);
 		long start_pos = (long)header_offset + ((long)height_lower * width * 3);
 		fseek(fp, start_pos, SEEK_SET);
 		double zoom, center_x, center_y;

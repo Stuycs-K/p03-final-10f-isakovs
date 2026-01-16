@@ -11,6 +11,8 @@ int main() {
 	getcwd(wd_path, sizeof(wd_path));
 	int nodes;
 	int option;
+	int width;
+	int maxheight; 
 	printf("File scanning (1)\nBogosort (2)\nApproximate Pi (3)\nMandelbrot Set (4)\nChoose the number program to test: ");
 	scanf("%d", &option);
 	if (!(option == 1 || option == 2 || option == 3 || option == 4)) {
@@ -51,6 +53,9 @@ int main() {
 		}
 		printf("Choose a Mandelbrot set area to plot:\nRegular Mandelbrot Set (1)\nSeahorse Valley (2)\nElephant Valley (3)\nTriple Spiral (4)\nChoose (1-4): ");
 		scanf("%d", &coordset);
+		printf("Choose a square size of the image in pixels: ");
+		scanf("%d", &width);
+		maxheight = width;
 	}
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
@@ -71,8 +76,7 @@ int main() {
 	int unsorted[order];
 	int seed;
 	FILE* r_file;
-	const int width = 800;
-	const int maxheight = 800; // if changing this, change its counterpart in node.c
+	// if changing this, change its counterpart in node.c
 	if (option == 2) {
 		r_file = fopen("/dev/urandom", "rb");
 		fread(unsorted, sizeof(int), order, r_file);
