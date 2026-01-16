@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <poll.h>
+#include <float.h>
 
 
 #ifndef NETWORKING_H

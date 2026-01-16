@@ -3,6 +3,7 @@
 // IDEAS: MANDELBROT SET, MONTE CARLO, BRUTE FORCE PASSWORD HASHING
 
 #define BYTES (1024LL*1024LL*1024LL*8LL)
+#define PI 3.141592653589793238462643383279502884L
 
 int main() {
 	signal(SIGCHLD, SIG_IGN); // prevents zombies
@@ -24,7 +25,7 @@ int main() {
 	}
 	int order;
 	if (option == 2) {
-		printf("What order of Bogosort should be tested? (Soft maximum is 13): ");
+		printf("What order of Bogosort should be tested? (Recommended maximum is 13): ");
 		scanf("%d", &order);
 		if (order<2) {
 			printf("Choose an order above 1!\n");
@@ -32,8 +33,8 @@ int main() {
 		}
 		else if (order>13) printf("Good luck.\n");
 	}
-	if (option == 3) {
-		printf("How many seconds should be spent on the approximation?: \n");
+	else if (option == 3) {
+		printf("How precise do you want it to be? (Recommended 1-10): ");
 		scanf("%d", &order);
 		if (order<1) {
 			printf("Choose one or more seconds.\n");
@@ -73,7 +74,7 @@ int main() {
 		if (option == 1) {
 			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %lld %lld", wd_path, ip, wd_path, option, ((long long)i)*seg, (i==nodes-1)?(BYTES):((long long)(i+1))*seg);
 		}
-		if (option == 2) {
+		else if (option == 2) {
 			r_file = fopen("/dev/urandom", "rb");
 			fread(&seed, sizeof(int), 1, r_file);
 			fclose(r_file);
@@ -82,8 +83,11 @@ int main() {
 				snprintf(cmd+strlen(cmd), sizeof(cmd), " %d", unsorted[j]);
 			}
 		}
-		if (option == 3) {
-			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %s %d %d", wd_path, ip, wd_path, option, order, seed);
+		else if (option == 3) {	
+			r_file = fopen("/dev/urandom", "rb");
+			fread(&seed, sizeof(int), 1, r_file);
+			fclose(r_file);
+			snprintf(cmd, sizeof(cmd), "%s/progn %s %s %d %d %d", wd_path, ip, wd_path, option, order, seed);
 		}
 		snprintf(cmd2, sizeof(cmd2), "sisakov60@149.89.40.%d", 100+i);
 		char* args[] = {"ssh", cmd2, cmd, 0};
@@ -166,8 +170,6 @@ int main() {
 					gettimeofday(&end_time, NULL);
 					double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
 					printf("Solved in %f seconds.\n", time_taken);
-					//const char buffchar[] = "h";
-					//close(socks[i]);
 					for (int j = 0; j<nodes; j++) {
 						//if (j == i) continue;
 						//write(socks[j], buffchar, sizeof(buffchar));
@@ -177,6 +179,32 @@ int main() {
 				}
 			}
 		}
+	}
+	else if (option == 3) {
+		int nodes_finished = 0;
+		long double sum = 0.0L;
+		while (nodes_finished < nodes) {
+			select_fds = read_fds;
+			int selret = select(fd_max + 1, &select_fds, NULL, NULL, NULL);
+			if (!selret) {
+				printf("sel returned zero\n");
+				return 1;
+			}
+			for (int i = 0; i < nodes; i++) {
+				if (FD_ISSET(socks[i], &select_fds)) {
+					long double buff;
+					read(socks[i], &buff, sizeof(long double));
+					sum += buff;
+					close(socks[i]);
+					FD_CLR(socks[i], &read_fds);
+					nodes_finished++;
+				}
+			}
+		}
+		gettimeofday(&end_time, NULL);
+		double time_taken = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+		long double approx = sum/(long double)nodes;
+		printf("Pi approximation is %.*Lf (%f%% error), took %f seconds.\n", LDBL_DECIMAL_DIG, approx, (float)((approx-PI)/PI), time_taken);
 	}
 	return 0;
 }
